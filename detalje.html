@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="da">
+
+<head>
+    <meta charset="UTF-8">
+    <title>BABUSHKA</title>
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro|Sriracha&display=swap" rel="stylesheet">
+
+    <style>
+        /* Generelle indstillinger */
+        body {
+            margin: 0;
+        }
+
+        img {
+
+            width: 100%;
+            height: 100%;
+        }
+
+        p {
+            font-family: 'Source Sans Pro', sans-serif;
+            font-size: 1.2rem;
+            line-height: 2.1rem;
+            padding: 0 1vw 0 0;
+        }
+
+        h1 {
+            font-family: 'Sriracha', cursive;
+            font-size: 4rem;
+            text-align: center;
+        }
+
+        h2 {
+            font-family: 'Source Sans Pro', sans-serif;
+            font-size: 2.8rem;
+            margin: 0;
+            padding: 4vw 0 3vw 0;
+        }
+
+        .pris {
+            font-size: 2rem;
+        }
+
+
+
+
+
+        /* INDHOLD */
+
+        #detalje {
+            width: 100vw;
+            height: 100vw;
+            position: fixed;
+            z-index: 10;
+            overflow: scroll;
+        }
+
+
+        #mad {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .col {
+            flex-grow: 1;
+            flex-basis: 400px;
+
+            margin: 0.5vw 2vw 20vw 2vw;
+
+        }
+
+
+
+        /* KNAP */
+
+        .luk {
+            cursor: pointer;
+            width: 2vw;
+            height: 2vw;
+            margin: 0 1rem 1rem 1rem;
+            border: none;
+            font-size: 0.9rem;
+        }
+
+        .luk:hover {
+            color: grey;
+            cursor: pointer;
+        }
+
+
+
+
+
+        .skjul {
+            display: none;
+        }
+
+    </style>
+</head>
+
+
+
+
+
+<body>
+
+    <header>
+        <h1>BABUSHKA</h1>
+
+    </header>
+
+
+    <section id="detalje" class="skjul">
+        <button class="luk">Tilbage</button>
+        <article id="mad">
+            <div class="col"><img src=""></div>
+            <div class="col">
+                <h2></h2>
+                <p class="lang"></p>
+                <p class="oprindelse">Oprindelse: </p>
+                <p class="pris"></p>
+            </div>
+        </article>
+    </section>
+
+
+
+
+
+
+    <script>
+        const endpoint = "https://spreadsheets.google.com/feeds/list/17Dd7DvkPaFamNUdUKlrFgnH6POvBJXac7qyiS6zNRw0/od6/public/values?alt=json";
+        const detalje = document.querySelector("#detalje");
+        const urlParams = new URLSearchParams(window.location.search);
+        const id = urlParams.get("id");
+
+
+        document.addEventListener("DOMContentLoaded", start);
+
+
+        function start() {
+            loadData();
+        }
+
+        async function loadData() {
+            const response = await fetch(endpoint);
+            mad = await response.json();
+
+            visMad();
+        }
+
+
+
+
+
+
+
+
+        function visMad() {
+            mad.feed.entry.forEach(mad => {
+                if (mad.gsx$id.$t == id) {
+                    detalje.classList.remove("skjul");
+                    detalje.querySelector("button").addEventListener("click", () => {
+                        history.back();
+                    });
+
+
+
+                    console.log(mad.gsx$navn.$t);
+                    detalje.querySelector("h2").textContent = mad.gsx$navn.$t;
+                    detalje.querySelector("img").src = `imgs/large/${mad.gsx$billede.$t}.jpg`;
+                    detalje.querySelector("img").alt = "Portæt af" + mad.gsx$navn.$t;
+                    detalje.querySelector(".lang").textContent = mad.gsx$lang.$t;
+                    detalje.querySelector(".oprindelse").textContent += mad.gsx$oprindelse.$t;
+                    detalje.querySelector(".pris").textContent += mad.gsx$pris.$t + ",-";
+
+                }
+            });
+        }
+
+
+
+        function addEventlistenersToButtons() {
+            document.querySelectorAll(".filter").forEach(elm => {
+                elm.addEventListener("click", filtrering);
+            })
+        }
+
+
+
+
+        function filtrering() {
+            console.log("filter");
+            filter = this.dataset.køn;
+            document.querySelector("h1").textContent = this.textContent;
+            document.querySelectorAll(".filter").forEach(elm => {
+                elm.classList.remove("valgt");
+            })
+            this.classList.add("valgt");
+            visPersoner();
+        }
+
+    </script>
+
+
+
+
+
+</body>
+
+</html>

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="da">
+
+<head>
+    <meta charset="UTF-8">
+    <title>BABUSHKA</title>
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro|Sriracha&display=swap" rel="stylesheet">
+
+
+
+
+
+    <style>
+        body {
+            margin: 0;
+        }
+
+        h1 {
+            font-family: 'Sriracha', cursive;
+            font-size: 4rem;
+            text-align: center;
+        }
+
+        /* MENU */
+
+        nav {
+            text-align: center;
+        }
+
+
+        .filter {
+            border: none;
+            font-size: 1.2rem;
+            padding: 1.9vw;
+        }
+
+        .filter:hover {
+            color: grey;
+            cursor: pointer;
+        }
+
+        .valgt {
+            color: grey;
+        }
+
+
+
+
+
+
+        /* SITE */
+
+        .mad {
+            border: solid 1px rgba(199, 198, 198, 0.83);
+            margin: 30px;
+            cursor: pointer;
+        }
+
+
+        article img {
+            width: 100%;
+        }
+
+        p {
+            padding: 0 1.5vw 1.5vw 1.5vw;
+            margin: 0;
+            font-family: 'Source Sans Pro', sans-serif;
+            font-size: 1rem;
+            line-height: 1.5rem;
+            text-align: center;
+        }
+
+        .pris {
+            font-size: 1.9rem;
+            padding: 1.5vw;
+            text-align: center;
+        }
+
+
+
+        .h2_navn {
+            padding: 1.5vw;
+            margin: 0;
+            font-family: 'Source Sans Pro', sans-serif;
+            font-size: 1.6rem;
+            text-align: center;
+        }
+
+        .data-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            margin: 0 3vw;
+            padding: 0 10vw;
+        }
+
+    </style>
+</head>
+
+
+
+
+
+<body>
+
+    <header>
+        <h1>BABUSHKA</h1>
+
+    </header>
+
+
+    <nav class="menu">
+        <button class="filter" data-kategori="alle">Alle retter</button>
+        <button class="filter" data-kategori="forretter">Forretter</button>
+        <button class="filter" data-kategori="hovedretter">Hovedretter</button>
+        <button class="filter" data-kategori="desserter">Desserter</button>
+        <button class="filter" data-kategori="sideorders">Sideorders</button>
+        <button class="filter" data-kategori="drikkevarer">Drikkevarer</button>
+    </nav>
+
+
+
+    <section class="data-container"></section>
+
+    <template>
+        <article class="mad">
+            <img src="" alt="">
+            <h2 class="h2_navn"></h2>
+            <p class="kort"></p>
+            <p class="pris"></p>
+
+        </article>
+    </template>
+
+
+
+
+
+
+    <script>
+        const endpoint = "https://spreadsheets.google.com/feeds/list/17Dd7DvkPaFamNUdUKlrFgnH6POvBJXac7qyiS6zNRw0/od6/public/values?alt=json";
+        let mad = {}
+        let filter = "alle";
+        const container = document.querySelector(".data-container");
+        const template = document.querySelector("template");
+
+
+        document.addEventListener("DOMContentLoaded", start);
+
+
+
+
+        function start() {
+            loadData();
+        }
+
+        async function loadData() {
+            const response = await fetch(endpoint);
+            personer = await response.json();
+
+            visMad();
+        }
+
+
+
+
+        function visMad() {
+            container.innerHTML = "";
+            personer.feed.entry.forEach(mad => {
+                if (filter == "alle" || filter == mad.gsx$kategori.$t) {
+
+                    //løb maden igennem og indsæt data i en template
+                    let klon = template.cloneNode(true).content;
+                    klon.querySelector("img").src = `imgs/small/${mad.gsx$billede.$t}-sm.jpg`;
+                    klon.querySelector("img").alt = "Portæt af" + mad.gsx$navn.$t;
+                    klon.querySelector("h2").textContent = mad.gsx$navn.$t;
+                    klon.querySelector(".kort").textContent = mad.gsx$kort.$t;
+                    klon.querySelector(".pris").textContent += mad.gsx$pris.$t + ",-";
+                    klon.querySelector(".mad").addEventListener("click", () => {
+                        location.href = "detalje.html?id=" + mad.gsx$id.$t
+                    });
+                    container.appendChild(klon);
+                    addEventlistenersToButtons();
+                }
+            })
+        }
+
+
+
+
+
+        function addEventlistenersToButtons() {
+            document.querySelectorAll(".filter").forEach(elm => {
+                elm.addEventListener("click", filtrering);
+            })
+        }
+
+
+
+
+
+        function filtrering() {
+            console.log("filter");
+            filter = this.dataset.kategori;
+            //            document.querySelector("h1").textContent = this.textContent;
+            document.querySelectorAll(".filter").forEach(elm => {
+                elm.classList.remove("valgt");
+            })
+            this.classList.add("valgt");
+            visMad();
+        }
+
+    </script>
+
+
+
+
+
+</body>
+
+</html>

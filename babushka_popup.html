@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="da">
+
+<head>
+    <meta charset="UTF-8">
+    <title>BABUSHKA</title>
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro|Sriracha&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+        }
+
+        nav {
+            text-align: center;
+        }
+
+        h1 {
+            font-family: 'Sriracha', cursive;
+            font-size: 4rem;
+            text-align: center;
+        }
+
+
+        /* MENU */
+
+        nav {
+            text-align: center;
+        }
+
+
+        .filter {
+            border: none;
+            font-size: 1.2rem;
+            padding: 1.9vw;
+        }
+
+        .filter:hover {
+            color: grey;
+            cursor: pointer;
+        }
+
+        .valgt {
+            color: grey;
+        }
+
+
+
+
+
+        /* SITE */
+
+
+
+        .mad {
+            border: solid 1px rgba(199, 198, 198, 0.83);
+            margin: 30px;
+            cursor: pointer;
+        }
+
+        article img {
+            width: 100%;
+        }
+
+        .p_site {
+            padding: 0 1.5vw 1.5vw 1.5vw;
+            margin: 0;
+            font-family: 'Source Sans Pro', sans-serif;
+            font-size: 1rem;
+            line-height: 1.5rem;
+            text-align: center;
+        }
+
+        .pris_site {
+            font-size: 1.9rem;
+            font-family: 'Source Sans Pro', sans-serif;
+            padding: 1.5vw;
+            text-align: center;
+        }
+
+        .h2_navn {
+            padding: 1.5vw;
+            margin: 0;
+            font-family: 'Source Sans Pro', sans-serif;
+            font-size: 1.6rem;
+            text-align: center;
+        }
+
+
+        .data-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            margin: 0 3vw;
+            padding: 0 10vw;
+        }
+
+
+
+
+
+
+        /* POPUP */
+
+
+        #detalje {
+            width: 100%;
+            height: 100%;
+            position: fixed;
+            z-index: 10;
+
+            background-color: white;
+
+        }
+
+
+        #mad {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .col {
+            flex-grow: 1;
+            flex-basis: 400px;
+
+            margin: 0.5vw 2vw 20vw 2vw;
+        }
+
+        .p_popup {
+            font-family: 'Source Sans Pro', sans-serif;
+            font-size: 1.2rem;
+            line-height: 2.1rem;
+            padding: 0 1vw 0 0;
+        }
+
+        .pris_popup {
+            font-size: 2rem;
+            font-family: 'Source Sans Pro', sans-serif;
+        }
+
+        .h2_popup {
+            font-family: 'Source Sans Pro', sans-serif;
+            font-size: 2.8rem;
+            margin: 0;
+            padding: 4vw 0 3vw 0;
+        }
+
+        .skjul {
+            display: none;
+        }
+
+    </style>
+</head>
+
+
+
+
+
+<body>
+
+    <header>
+        <h1>BABUSHKA</h1>
+
+    </header>
+
+    <section id="detalje" class="skjul">
+        <button class="luk">X</button>
+        <article id="mad">
+            <div class="col"><img src=""></div>
+            <div class="col">
+                <h2 class="h2_popup"></h2>
+                <p class="lang p_popup"></p>
+                <p class="oprindelse p_popup">Oprindelse: </p>
+                <p class="pris pris_popup"></p>
+            </div>
+        </article>
+    </section>
+
+
+
+
+    <nav class="menu">
+        <button class="filter" data-kategori="alle">Alle retter</button>
+        <button class="filter" data-kategori="forretter">Forretter</button>
+        <button class="filter" data-kategori="hovedretter">Hovedretter</button>
+        <button class="filter" data-kategori="desserter">Desserter</button>
+        <button class="filter" data-kategori="sideorders">Sideorders</button>
+        <button class="filter" data-kategori="drikkevarer">Drikkevarer</button>
+    </nav>
+
+
+
+    <section class="data-container"></section>
+
+    <template>
+        <article class="mad">
+            <img src="" alt="">
+            <h2 class="h2_navn"></h2>
+            <p class="kort p_site"></p>
+            <p class="pris pris_site"></p>
+        </article>
+    </template>
+
+
+
+    <script>
+        const endpoint = "https://spreadsheets.google.com/feeds/list/17Dd7DvkPaFamNUdUKlrFgnH6POvBJXac7qyiS6zNRw0/od6/public/values?alt=json";
+        let mad = {}
+        let filter = "alle";
+        const container = document.querySelector(".data-container");
+        const template = document.querySelector("template");
+        const detalje = document.querySelector("#detalje");
+
+
+        document.addEventListener("DOMContentLoaded", start);
+
+
+        function start() {
+            loadData();
+        }
+
+        async function loadData() {
+            const response = await fetch(endpoint);
+            mad = await response.json();
+
+            visMad();
+        }
+
+
+
+        function visMad() {
+            container.innerHTML = "";
+            mad.feed.entry.forEach(mad => {
+                if (filter == "alle" || filter == mad.gsx$kategori.$t) {
+
+                    //løb dyrene igennem og indsæt data i en template
+                    let klon = template.cloneNode(true).content;
+                    klon.querySelector("img").src = `imgs/small/${mad.gsx$billede.$t}-sm.jpg`;
+                    klon.querySelector("img").alt = "Portæt af" + mad.gsx$navn.$t;
+                    klon.querySelector("h2").textContent = mad.gsx$navn.$t;
+                    klon.querySelector(".kort").textContent = mad.gsx$kort.$t;
+                    klon.querySelector(".pris").textContent += mad.gsx$pris.$t + ",-";
+                    klon.querySelector(".mad").addEventListener("click", () => {
+                        visDetalje(mad)
+                    });
+                    container.appendChild(klon);
+                    addEventlistenersToButtons();
+                }
+            })
+        }
+
+
+
+
+        function addEventlistenersToButtons() {
+            document.querySelectorAll(".filter").forEach(elm => {
+                elm.addEventListener("click", filtrering);
+            })
+        }
+
+
+
+
+
+        function filtrering() {
+            console.log("filter");
+            filter = this.dataset.kategori;
+            document.querySelector("h2").textContent = this.textContent;
+            document.querySelectorAll(".filter").forEach(elm => {
+                elm.classList.remove("valgt");
+            })
+            this.classList.add("valgt");
+            visMad();
+        }
+
+
+
+
+
+        function visDetalje(mad) {
+            detalje.classList.remove("skjul");
+            detalje.querySelector("button").addEventListener("click", () => detalje.classList.add("skjul"));
+            console.log(mad.gsx$navn.$t);
+            detalje.querySelector("img").src = `imgs/large/${mad.gsx$billede.$t}.jpg`;
+            detalje.querySelector("img").alt = "Portæt af" + mad.gsx$navn.$t;
+            detalje.querySelector("h2").textContent = mad.gsx$navn.$t;
+            detalje.querySelector(".lang").textContent = mad.gsx$lang.$t;
+            detalje.querySelector(".pris").textContent += mad.gsx$pris.$t + ",-";
+        }
+
+    </script>
+
+
+
+
+
+</body>
+
+</html>
